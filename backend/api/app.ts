@@ -4,17 +4,17 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
-import { errorHandler, notFound } from './middleware/error.middleware';
-import authRoutes from './routes/auth.routes';
-import expenseRoutes from './routes/expense.routes';
-import groupRoutes from './routes/group.routes';
-import settlementRoutes from './routes/settlement.routes';
-import userRoutes from './routes/user.routes';
-import friendRoutes from './routes/friend.routes';
-import pushRoutes from './routes/push.routes';
-import chatRoutes from './routes/chat.routes';
-import analyticsRoutes from './routes/analytics.routes';
-import exportRoutes from './routes/export.routes';
+import { errorHandler, notFound } from '../src/middleware/error.middleware';
+import authRoutes from '../src/routes/auth.routes';
+import expenseRoutes from '../src/routes/expense.routes';
+import groupRoutes from '../src/routes/group.routes';
+import settlementRoutes from '../src/routes/settlement.routes';
+import userRoutes from '../src/routes/user.routes';
+import friendRoutes from '../src/routes/friend.routes';
+import pushRoutes from '../src/routes/push.routes';
+import chatRoutes from '../src/routes/chat.routes';
+import analyticsRoutes from '../src/routes/analytics.routes';
+import exportRoutes from '../src/routes/export.routes';
 
 const app = express();
 
