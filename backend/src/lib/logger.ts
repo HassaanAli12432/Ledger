@@ -10,18 +10,13 @@ const logger = winston.createLogger({
     json()
   ),
   defaultMeta: { service: 'splitwise-api' },
+  // ✅ VERCEL FIX: File transports removed — Vercel has no writable filesystem
+  // Logs will appear in Vercel dashboard under "Functions" tab
   transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
-  ],
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
     new winston.transports.Console({
       format: combine(colorize(), simple()),
-    })
-  );
-}
+    }),
+  ],
+});
 
 export default logger;

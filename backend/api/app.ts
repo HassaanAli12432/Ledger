@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
 import { errorHandler, notFound } from '../src/middleware/error.middleware';
 import authRoutes from '../src/routes/auth.routes';
 import expenseRoutes from '../src/routes/expense.routes';
@@ -33,7 +32,7 @@ app.use(
 // Rate Limiting
 // ===========================
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
@@ -55,14 +54,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ===========================
-// Logging
+// Logging (console only - no file writes on Vercel)
 // ===========================
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// ===========================
-// Static Files (uploads)
-// ===========================
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use(morgan('combined'));
 
 // ===========================
 // Health Check
