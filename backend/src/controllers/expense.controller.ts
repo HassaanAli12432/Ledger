@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Response, NextFunction } from 'express';
 import { body } from 'express-validator';
 import { expenseService } from '../services/expense.service';

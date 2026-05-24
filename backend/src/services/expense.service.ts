@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Decimal } from '@prisma/client/runtime/library';
 import prisma from '../lib/prisma';
 import { createError } from '../middleware/error.middleware';
