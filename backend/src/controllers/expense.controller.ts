@@ -37,14 +37,14 @@ export const createExpense = [
           io.to(`group:${groupId}`).emit('expense:created', expense);
         }
         // Also emit to all individual users involved
-        expense.splits.forEach(split => {
+        (expense as any).splits.forEach((split: any) => {
           io.to(`user:${split.userId}`).emit('expense:created', expense);
         });
       }
 
       // Trigger Push and Email Notifications
       const payerName = req.user!.name;
-      expense.splits.forEach(async (split) => {
+      (expense as any).splits.forEach(async (split: any) => {
         // Don't notify the person who created it
         if (split.userId !== req.user!.id) {
           const splitAmount = Number(split.owedAmount);

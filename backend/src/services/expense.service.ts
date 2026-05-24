@@ -75,7 +75,7 @@ export const expenseService = {
             paidAmount: s.userId === data.payerId ? new Decimal(s.amount) : new Decimal(0),
           })),
         },
-      },
+      } as any,
       include: {
         payer: { select: { id: true, name: true, avatarUrl: true } },
         splits: {

@@ -10,14 +10,14 @@ const SALT_ROUNDS = 12;
 export const generateTokens = (user: { id: string; email: string; name: string }) => {
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, name: user.name },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    process.env.JWT_SECRET as string,
+    { expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as string }
   );
 
   const refreshToken = jwt.sign(
     { id: user.id },
-    process.env.JWT_REFRESH_SECRET!,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    process.env.JWT_REFRESH_SECRET as string,
+    { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as string }
   );
 
   return { accessToken, refreshToken };
