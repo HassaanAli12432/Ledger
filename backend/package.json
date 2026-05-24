@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "prisma generate && tsc",
+    "vercel-build": "prisma generate",
     "start": "node dist/server.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
@@ -27,7 +28,6 @@
     "nodemailer": "^6.9.13",
     "socket.io": "^4.7.5",
     "uuid": "^10.0.0",
-    "vercel": "^54.4.1",
     "web-push": "^3.6.7",
     "winston": "^3.13.0"
   },

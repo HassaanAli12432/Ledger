@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import http from 'http';
 import { Server } from 'socket.io';
-import app from './app';
+import app from '../api/app';
 import { setupSockets } from './sockets/socket';
 import { setupCronJobs } from './jobs/reminders';
 import prisma from './lib/prisma';

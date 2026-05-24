@@ -6,7 +6,8 @@ let socket: Socket | null = null;
 export const getSocket = (): Socket => {
   if (!socket) {
     const token = useAuthStore.getState().accessToken;
-    socket = io('http://localhost:5000', {
+    const backendUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    socket = io(backendUrl, {
       auth: { token },
       transports: ['websocket'],
       autoConnect: false,
