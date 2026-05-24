@@ -16,7 +16,7 @@ const navItems = [
   { to: '/chat', icon: MessageCircle, label: 'Chat' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavClick }: { onNavClick?: () => void }) {
   const { user, refreshToken, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
@@ -58,6 +58,7 @@ export default function Sidebar() {
             key={to}
             to={to}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            onClick={onNavClick}
           >
             <Icon size={14} />
             {label}
