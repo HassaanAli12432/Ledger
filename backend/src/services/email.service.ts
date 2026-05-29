@@ -34,6 +34,55 @@ export const emailService = {
     }
   },
 
+  async sendVerificationEmail(to: string, name: string, token: string) {
+    try {
+      const link = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to,
+        subject: '✉️ Verify your email for Splitwise Clone',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #1cc29f;">Welcome, ${name}!</h1>
+            <p>Please verify your email address to complete your registration.</p>
+            <a href="${link}" style="background: #1cc29f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 16px;">
+              Verify Email
+            </a>
+            <p style="margin-top: 24px; color: #666; font-size: 12px;">This link expires in 24 hours.</p>
+          </div>
+        `,
+      });
+      logger.info(`Verification email sent to ${to}`);
+    } catch (err) {
+      logger.error('Failed to send verification email', { error: err });
+    }
+  },
+
+  async sendPasswordResetEmail(to: string, name: string, token: string) {
+    try {
+      const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to,
+        subject: '🔒 Reset your password for Splitwise Clone',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1cc29f;">Password Reset Request</h2>
+            <p>Hi ${name},</p>
+            <p>You requested to reset your password. Click the button below to set a new password.</p>
+            <a href="${link}" style="background: #1cc29f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 16px;">
+              Reset Password
+            </a>
+            <p style="margin-top: 24px; color: #666; font-size: 12px;">This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+          </div>
+        `,
+      });
+      logger.info(`Password reset email sent to ${to}`);
+    } catch (err) {
+      logger.error('Failed to send password reset email', { error: err });
+    }
+  },
+
   async sendExpenseNotification(
     to: string,
     name: string,

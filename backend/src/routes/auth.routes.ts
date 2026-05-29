@@ -7,6 +7,9 @@ const router = Router();
 // Public routes
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.get('/verify-email', authController.verifyEmail);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
 router.post('/refresh', authController.refreshToken);
 router.post('/google', authController.googleCallback);
 

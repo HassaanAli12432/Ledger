@@ -17,6 +17,15 @@ export const loginValidation = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+export const forgotPasswordValidation = [
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+];
+
+export const resetPasswordValidation = [
+  body('token').notEmpty().withMessage('Token is required'),
+  body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+];
+
 export const register = [
   ...registerValidation,
   validate,
@@ -39,6 +48,48 @@ export const login = [
       const { email, password } = req.body;
       const result = await authService.login(email, password);
       res.json({ success: true, message: 'Login successful', data: result });
+    } catch (err) {
+      next(err);
+    }
+  },
+];
+
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== 'string') {
+      res.status(400).json({ success: false, message: 'Invalid token' });
+      return;
+    }
+    await authService.verifyEmail(token);
+    res.json({ success: true, message: 'Email verified successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const forgotPassword = [
+  ...forgotPasswordValidation,
+  validate,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body;
+      await authService.requestPasswordReset(email);
+      res.json({ success: true, message: 'If an account exists, a reset email has been sent.' });
+    } catch (err) {
+      next(err);
+    }
+  },
+];
+
+export const resetPassword = [
+  ...resetPasswordValidation,
+  validate,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { token, newPassword } = req.body;
+      await authService.resetPassword(token, newPassword);
+      res.json({ success: true, message: 'Password has been reset successfully' });
     } catch (err) {
       next(err);
     }

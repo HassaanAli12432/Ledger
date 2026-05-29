@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { BookOpen, TrendingUp, Shield, Zap } from 'lucide-react';
+import { BookOpen, Shield, TrendingUp, Zap } from 'lucide-react';
 import api from '@/lib/api';
-import { useAuthStore } from '@/store/auth.store';
 
 const schema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -20,25 +18,29 @@ const features = [
   { icon: Zap, text: 'Instant debt simplification' },
 ];
 
-export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
+export default function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const navigate = useNavigate();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast.error('Invalid token');
+      return;
+    }
+    
     setLoading(true);
     try {
-      const res = await api.post('/auth/login', data);
-      const { user, accessToken, refreshToken } = res.data.data;
-      setAuth(user, accessToken, refreshToken);
-      toast.success(`Welcome back, ${user.name}`);
-      navigate('/dashboard');
+      await api.post('/auth/reset-password', { token, newPassword: data.newPassword });
+      toast.success('Password reset successfully!');
+      navigate('/login');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.error(err.response?.data?.message || 'Reset failed');
     } finally {
       setLoading(false);
     }
@@ -80,41 +82,27 @@ export default function LoginPage() {
       <div className="auth-panel-right">
         <div className="animate-fade-up">
           <div style={{ marginBottom: '2.5rem' }}>
-            <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Sign in</h1>
+            <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Set New Password</h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
-              Continue managing your shared finances.
+              Please enter your new password below.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
-              <label className="label">Email Address</label>
-              <input {...register('email')} className="input" type="email" placeholder="you@example.com" />
-              {errors.email && <p style={{ fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.375rem', fontWeight: 500 }}>{errors.email.message}</p>}
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
-                <label className="label" style={{ marginBottom: 0 }}>Password</label>
-                <Link to="/forgot-password" style={{ fontSize: '0.8125rem', color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</Link>
+          {!token ? (
+            <p style={{ color: 'var(--danger)', fontWeight: 500 }}>Invalid password reset link.</p>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <label className="label">New Password</label>
+                <input {...register('newPassword')} className="input" type="password" placeholder="••••••••" />
+                {errors.newPassword && <p style={{ fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.375rem', fontWeight: 500 }}>{errors.newPassword.message}</p>}
               </div>
-              <input {...register('password')} className="input" type="password" placeholder="••••••••" />
-              {errors.password && <p style={{ fontSize: '0.8125rem', color: 'var(--danger)', marginTop: '0.375rem', fontWeight: 500 }}>{errors.password.message}</p>}
-            </div>
 
-            <button type="submit" className="btn-gold" style={{ marginTop: '0.5rem', width: '100%' }} disabled={loading}>
-              {loading ? <span className="spinner" /> : 'Continue'}
-            </button>
-          </form>
-
-          <div className="divider" style={{ margin: '2rem 0' }}>or</div>
-
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-            Don't have an account?{' '}
-            <Link to="/register" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}>
-              Create one
-            </Link>
-          </p>
+              <button type="submit" className="btn-gold" style={{ marginTop: '0.5rem', width: '100%' }} disabled={loading}>
+                {loading ? <span className="spinner" /> : 'Reset Password'}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

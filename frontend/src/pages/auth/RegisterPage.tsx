@@ -27,11 +27,9 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      const res = await api.post('/auth/register', data);
-      const { user, accessToken, refreshToken } = res.data.data;
-      setAuth(user, accessToken, refreshToken);
-      toast.success('Account created! Welcome to Ledger.');
-      navigate('/dashboard');
+      await api.post('/auth/register', data);
+      toast.success('Account created! Please check your email to verify your account.');
+      navigate('/login');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {

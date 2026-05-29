@@ -36,18 +36,23 @@ export const authService = {
       select: { id: true, name: true, email: true, avatarUrl: true, currency: true, createdAt: true },
     });
 
-    const { accessToken, refreshToken } = generateTokens(user);
-
+    const verificationToken = uuidv4();
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-    await prisma.refreshToken.create({
-      data: { token: refreshToken, userId: user.id, expiresAt },
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    await prisma.token.create({
+      data: {
+        token: verificationToken,
+        userId: user.id,
+        type: 'EMAIL_VERIFICATION',
+        expiresAt,
+      },
     });
 
-    // Send welcome email (non-blocking)
-    emailService.sendWelcomeEmail(user.email, user.name).catch(() => {});
+    // Send verification email (non-blocking)
+    emailService.sendVerificationEmail(user.email, user.name, verificationToken).catch(() => {});
 
-    return { user, accessToken, refreshToken };
+    return { user };
   },
 
   async login(email: string, password: string) {
@@ -56,6 +61,10 @@ export const authService = {
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) throw createError('Invalid credentials', 401);
+
+    if (!user.isEmailVerified) {
+      throw createError('Email is not verified. Please check your inbox.', 403);
+    }
 
     const { accessToken, refreshToken } = generateTokens(user);
 
@@ -97,6 +106,66 @@ export const authService = {
 
   async logout(refreshToken: string) {
     await prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
+  },
+
+  async verifyEmail(token: string) {
+    const storedToken = await prisma.token.findUnique({ where: { token } });
+    if (!storedToken || storedToken.type !== 'EMAIL_VERIFICATION' || storedToken.expiresAt < new Date()) {
+      throw createError('Invalid or expired verification token', 400);
+    }
+
+    await prisma.user.update({
+      where: { id: storedToken.userId },
+      data: { isEmailVerified: true },
+    });
+
+    await prisma.token.delete({ where: { id: storedToken.id } });
+  },
+
+  async requestPasswordReset(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // Return success anyway to prevent email enumeration
+      return;
+    }
+
+    const resetToken = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    // Delete existing reset tokens
+    await prisma.token.deleteMany({
+      where: { userId: user.id, type: 'PASSWORD_RESET' },
+    });
+
+    await prisma.token.create({
+      data: {
+        token: resetToken,
+        userId: user.id,
+        type: 'PASSWORD_RESET',
+        expiresAt,
+      },
+    });
+
+    emailService.sendPasswordResetEmail(user.email, user.name, resetToken).catch(() => {});
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const storedToken = await prisma.token.findUnique({ where: { token } });
+    if (!storedToken || storedToken.type !== 'PASSWORD_RESET' || storedToken.expiresAt < new Date()) {
+      throw createError('Invalid or expired reset token', 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await prisma.user.update({
+      where: { id: storedToken.userId },
+      data: { password: hashedPassword },
+    });
+
+    await prisma.token.deleteMany({
+      where: { userId: storedToken.userId, type: 'PASSWORD_RESET' },
+    });
   },
 
   async googleAuth(googleId: string, email: string, name: string, avatarUrl?: string) {

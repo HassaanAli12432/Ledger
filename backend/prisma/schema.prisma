@@ -31,6 +31,7 @@ model User {
 
   // Relations
   refreshTokens     RefreshToken[]
+  tokens            Token[]
   groupMemberships  GroupMember[]
   expensesPaid      Expense[]     @relation("ExpensePayer")
   expenseSplits     ExpenseSplit[]
@@ -53,6 +54,22 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Token {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  type      TokenType
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
 
 // ===========================
