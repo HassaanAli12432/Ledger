@@ -49,8 +49,8 @@ export const authService = {
       },
     });
 
-    // Send verification email (non-blocking)
-    emailService.sendVerificationEmail(user.email, user.name, verificationToken).catch(() => {});
+    // Send verification email (await so Vercel doesn't freeze the function, but catch errors)
+    await emailService.sendVerificationEmail(user.email, user.name, verificationToken).catch(() => {});
 
     return { user };
   },
