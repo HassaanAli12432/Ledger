@@ -147,7 +147,7 @@ export const authService = {
       },
     });
 
-    emailService.sendPasswordResetEmail(user.email, user.name, resetToken).catch(() => {});
+    await emailService.sendPasswordResetEmail(user.email, user.name, resetToken).catch(() => {});
   },
 
   async resetPassword(token: string, newPassword: string) {
